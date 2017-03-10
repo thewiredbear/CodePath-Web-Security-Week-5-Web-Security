@@ -57,15 +57,21 @@
       return $errors;
     }
 
+    $codename = db_escape($db, $agent['codename']);
+    $public_key = db_escape($db, $agent['public_key']);
+    $private_key = db_escape($db, $agent['private_key']);
+
     $sql = "INSERT INTO agents ";
     $sql .= "(codename, public_key, private_key) ";
     $sql .= "VALUES (";
-    $sql .= "'" . db_escape($db, $agent['codename']) . "',";
-    $sql .= "'" . db_escape($db, $agent['public_key']) . "',";
-    $sql .= "'" . db_escape($db, $agent['private_key']) . "'";
+    $sql .= "?" . ",";
+    $sql .= "?" . ",";
+    $sql .= "?" . "";
     $sql .= ");";
+    $sql = $db->prepare($sql);
+    $sql->bind_param("sss",$codename,$public_key,$private_key);
     // For INSERT statements, $result is just true/false
-    $result = db_query($db, $sql);
+    $result = $sql->execute();
     if($result) {
       return true;
     } else {
@@ -106,18 +112,26 @@
   function insert_message($message) {
     global $db;
 
+    $sender_id = db_escape($db, $message['sender_id']);
+    $recipient_id = db_escape($db, $message['recipient_id']);
+    $cipher_text = db_escape($db, $message['cipher_text']);
+    $signature = db_escape($db, $message['signature']);
+
+
     $created_at = date("Y-m-d H:i:s");
     $sql = "INSERT INTO messages ";
     $sql .= "(sender_id, recipient_id, cipher_text, signature, created_at) ";
     $sql .= "VALUES (";
-    $sql .= "'" . db_escape($db, $message['sender_id']) . "',";
-    $sql .= "'" . db_escape($db, $message['recipient_id']) . "',";
-    $sql .= "'" . db_escape($db, $message['cipher_text']) . "',";
-    $sql .= "'" . db_escape($db, $message['signature']) . "',";
+    $sql .= "?" . ",";
+    $sql .= "?" . ",";
+    $sql .= "?" . ",";
+    $sql .= "?" . ",";
     $sql .= "'" . $created_at . "'";
     $sql .= ");";
+    $sql = $db->prepare($sql);
+    $sql->bind_param("ssss",$sender_id,$recipient_id,$cipher_text,$signature);
     // For INSERT statements, $result is just true/false
-    $result = db_query($db, $sql);
+    $result = $sql->execute();
     if($result) {
       return true;
     } else {
